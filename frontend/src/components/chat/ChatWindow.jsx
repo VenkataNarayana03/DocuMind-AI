@@ -15,7 +15,7 @@ export default function ChatWindow({ messages }) {
         <div className="mx-auto mt-16 max-w-md text-center">
           <h2 className="text-xl font-semibold">Ask your documents anything</h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            Upload one or more documents, then ask for answers, summaries, sources, quizzes, or flashcards.
+            Upload one or more documents, then ask for answers, summaries, or sources.
           </p>
         </div>
       ) : (

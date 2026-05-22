@@ -14,6 +14,7 @@ from app.services.documents.document_loader import extract_document_text
 from app.services.llm.groq_client import GroqClient
 from app.services.llm.prompts import FLASHCARD_PROMPT, QUIZ_PROMPT, SUMMARY_PROMPT
 from app.services.rag.chunking import TextChunk, chunk_pages
+from app.services.rag.citation_handler import order_sources_for_answer
 from app.services.rag.embeddings import EmbeddingService
 from app.services.rag.pinecone_store import VectorStore
 from app.utils.helpers import safe_filename
@@ -83,7 +84,8 @@ class RAGPipeline:
 
     def ask(self, question: str, document_ids: Optional[List[str]], history: List[ChatMessage]) -> tuple[str, List[Source]]:
         sources = self.retrieve(question, document_ids)
-        return self.llm.answer(question, sources, history), sources
+        answer = self.llm.answer(question, sources, history)
+        return answer, order_sources_for_answer(answer, sources)
 
     def retrieve(self, query: str, document_ids: Optional[List[str]] = None, top_k: Optional[int] = None) -> List[Source]:
         vector = self.embeddings.embed([query])[0]
