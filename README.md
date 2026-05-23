@@ -67,21 +67,7 @@ User uploads PDF files
 
 Open two PowerShell terminals in the project root:
 
-```powershell
-C:\Users\MOGILI JYOTHI\Downloads\DocuMind-AI
-```
 
-Terminal 1:
-
-```powershell
-.\run-backend.ps1
-```
-
-Terminal 2:
-
-```powershell
-.\run-frontend.ps1
-```
 
 Open the app:
 
