@@ -77,7 +77,22 @@ class VectorStore:
         results.sort(key=lambda source: source.score, reverse=True)
         return results[:top_k]
 
-    def delete_document(self, document_id: str) -> None:
+    def delete_vectors(self, vector_ids: Iterable[str]) -> None:
+        ids = list(vector_ids)
+        if not ids:
+            return
+        if self._pinecone_index:
+            try:
+                self._pinecone_index.delete(ids=ids)
+            except Exception:
+                self._pinecone_index = None
+        for key in ids:
+            self._local.pop(key, None)
+
+    def delete_document(self, document_id: str, vector_ids: Optional[Iterable[str]] = None) -> None:
+        if vector_ids:
+            self.delete_vectors(vector_ids)
+            return
         if self._pinecone_index:
             try:
                 self._pinecone_index.delete(filter={"document_id": {"$eq": document_id}})
@@ -87,7 +102,10 @@ class VectorStore:
         for key in [key for key, value in self._local.items() if value["metadata"]["document_id"] == document_id]:
             del self._local[key]
 
-    def delete_session(self, session_id: str) -> None:
+    def delete_session(self, session_id: str, vector_ids: Optional[Iterable[str]] = None) -> None:
+        if vector_ids:
+            self.delete_vectors(vector_ids)
+            return
         if self._pinecone_index:
             try:
                 self._pinecone_index.delete(filter={"session_id": {"$eq": session_id}})

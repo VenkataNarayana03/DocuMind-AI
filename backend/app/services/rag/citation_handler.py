@@ -4,6 +4,20 @@ from typing import Iterable, List
 from app.models.document_models import Source
 
 
+def answer_has_no_document_support(answer: str) -> bool:
+    text = (answer or "").lower()
+    no_answer_phrases = (
+        "does not contain enough information",
+        "could not find",
+        "not found in the document",
+        "not mentioned in the document",
+        "not provided in the document",
+        "no information",
+        "insufficient information",
+    )
+    return any(phrase in text for phrase in no_answer_phrases)
+
+
 def dedupe_sources(sources: Iterable[Source]) -> List[Source]:
     seen = set()
     unique: List[Source] = []
@@ -46,6 +60,9 @@ def pages_cited_in_answer(answer: str) -> List[int]:
 
 
 def order_sources_for_answer(answer: str, sources: Iterable[Source]) -> List[Source]:
+    if answer_has_no_document_support(answer):
+        return []
+
     unique = dedupe_sources(sources)
     cited_pages = pages_cited_in_answer(answer)
     if not cited_pages:
@@ -53,6 +70,9 @@ def order_sources_for_answer(answer: str, sources: Iterable[Source]) -> List[Sou
 
     page_rank = {page: index for index, page in enumerate(cited_pages)}
     cited = [source for source in unique if source.page in page_rank]
-    uncited = [source for source in unique if source.page not in page_rank]
     cited.sort(key=lambda source: (page_rank[source.page], -source.score))
-    return cited + uncited
+    best_by_page = {}
+    for source in cited:
+        if source.page not in best_by_page:
+            best_by_page[source.page] = source
+    return list(best_by_page.values())

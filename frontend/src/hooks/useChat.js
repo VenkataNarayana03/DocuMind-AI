@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { askQuestion, streamQuestion } from "../services/chatService";
+import { askQuestion } from "../services/chatService";
 
 export default function useChat() {
   const [messages, setMessages] = useState([]);
@@ -14,18 +14,12 @@ export default function useChat() {
     setLoading(true);
 
     const payload = { question, document_ids: documentIds, history };
-    streamQuestion(payload, {
-      onToken: (token) => setMessages((current) => current.map((msg) => (msg.id === assistantId ? { ...msg, content: msg.content + token } : msg))),
-      onDone: (sources) => {
-        setMessages((current) => current.map((msg) => (msg.id === assistantId ? { ...msg, sources } : msg)));
-        setLoading(false);
-      },
-      onError: async () => {
-        const response = await askQuestion(payload);
-        setMessages((current) => current.map((msg) => (msg.id === assistantId ? { ...msg, content: response.answer, sources: response.sources } : msg)));
-        setLoading(false);
-      },
-    });
+    try {
+      const response = await askQuestion(payload);
+      setMessages((current) => current.map((msg) => (msg.id === assistantId ? { ...msg, content: response.answer, sources: response.sources } : msg)));
+    } finally {
+      setLoading(false);
+    }
   }
 
   return { messages, setMessages, loading, send };

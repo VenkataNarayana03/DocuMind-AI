@@ -14,24 +14,24 @@ class TextChunk:
 def chunk_pages(document_id: str, filename: str, pages: Iterable, size: int, overlap: int) -> List[TextChunk]:
     chunks: List[TextChunk] = []
     step = max(size - overlap, 1)
+    chunk_index = 0
     for page in pages:
         text = " ".join(page.text.split())
         if not text:
             continue
         start = 0
-        part = 0
         while start < len(text):
             body = text[start : start + size].strip()
             if body:
                 chunks.append(
                     TextChunk(
-                        id=f"{document_id}-p{page.page}-{part}",
+                        id=f"{document_id}-{chunk_index}",
                         document_id=document_id,
                         filename=filename,
                         page=page.page,
                         text=body,
                     )
                 )
+                chunk_index += 1
             start += step
-            part += 1
     return chunks

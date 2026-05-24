@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     embedding_backend: str = "auto"
     chunk_size: int = 950
     chunk_overlap: int = 160
-    top_k: int = 5
+    top_k: int = 7
     max_upload_mb: int = Field(default=25, ge=1)
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
